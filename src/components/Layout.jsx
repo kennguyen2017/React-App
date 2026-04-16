@@ -4,6 +4,15 @@ const navItems = [
   { label: "コラム", route: "#/column", iconClass: "is-column" },
 ];
 
+const footerLinks = [
+  "会員登録",
+  "運営会社",
+  "利用規約",
+  "個人情報の取扱について",
+  "特定商取引法に基づく表記",
+  "お問い合わせ",
+];
+
 export function Layout({ activeRoute, children }) {
   return (
     <div className="app-shell">
@@ -42,6 +51,15 @@ export function Layout({ activeRoute, children }) {
         </div>
       </header>
       <main className="page-content">{children}</main>
+      <footer className="app-footer">
+        <nav className="footer-nav" aria-label="Footer navigation">
+          {footerLinks.map((label) => (
+            <a className="footer-link" href="#/top" key={label}>
+              {label}
+            </a>
+          ))}
+        </nav>
+      </footer>
     </div>
   );
 }

@@ -245,6 +245,31 @@ body {
   gap: 20px;
 }
 
+.app-footer {
+  margin-top: 56px;
+  padding: 32px 24px;
+  background: #414141;
+}
+
+.footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px 46px;
+  align-items: center;
+}
+
+.footer-link {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 11px;
+  line-height: 1.6;
+  opacity: 0.92;
+}
+
+.footer-link:hover {
+  opacity: 1;
+}
+
 .top-hero {
   display: grid;
   grid-template-columns: minmax(280px, 1fr) minmax(420px, 1.4fr);
@@ -672,6 +697,193 @@ body {
   font-weight: 700;
 }
 
+.record-highlight-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.record-highlight-card {
+  position: relative;
+  min-height: 288px;
+  overflow: hidden;
+  background: #111;
+}
+
+.record-highlight-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: grayscale(0.15) brightness(0.5);
+}
+
+.record-highlight-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 204, 33, 0.08), rgba(0, 0, 0, 0.25));
+}
+
+.record-highlight-frame {
+  position: absolute;
+  inset: 20px;
+  border: 1px solid #ffcc21;
+}
+
+.record-highlight-content {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 24px;
+}
+
+.record-highlight-content h2 {
+  margin: 0;
+  color: #ffcc21;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 42px;
+  letter-spacing: 1px;
+}
+
+.record-highlight-content p {
+  margin: 8px 0 0;
+  padding: 2px 12px;
+  background: var(--orange);
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.record-chart-panel,
+.exercise-panel {
+  background: #2e2e2e;
+  color: #ffffff;
+  padding: 16px 24px 24px;
+}
+
+.record-panel-header {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.record-panel-header h2 {
+  margin: 0;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 30px;
+  letter-spacing: 1px;
+}
+
+.record-panel-header span {
+  color: var(--gold);
+  font-size: 16px;
+}
+
+.record-filter-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.record-filter-chip {
+  min-width: 56px;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--orange);
+  font-weight: 700;
+}
+
+.exercise-log-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 28px;
+  max-height: 240px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.exercise-log-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.exercise-log-item h3 {
+  position: relative;
+  margin: 0;
+  padding-left: 14px;
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.exercise-log-item h3::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.exercise-log-item p,
+.exercise-log-item span {
+  margin: 4px 0 0;
+  color: var(--gold);
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 24px;
+  letter-spacing: 0.5px;
+}
+
+.exercise-log-item span {
+  white-space: nowrap;
+}
+
+.diary-panel-heading {
+  margin-bottom: 10px;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 32px;
+  letter-spacing: 1px;
+}
+
+.diary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.diary-card {
+  min-height: 230px;
+  padding: 16px;
+  background: #ffffff;
+  border: 2px solid #707070;
+}
+
+.diary-card-date,
+.diary-card-time {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.diary-card-time {
+  margin-top: 2px;
+}
+
+.diary-card p {
+  margin: 12px 0 0;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
 .placeholder-note {
   text-align: center;
   color: var(--muted);
@@ -702,6 +914,14 @@ body {
     padding: 0 12px;
     gap: 10px;
     overflow-x: auto;
+  }
+
+  .app-footer {
+    padding: 24px 16px;
+  }
+
+  .footer-nav {
+    gap: 12px 24px;
   }
 
   .brand-word {
@@ -738,6 +958,15 @@ body {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .record-highlight-grid,
+  .diary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .exercise-log-grid {
+    grid-template-columns: 1fr;
+  }
+
   .top-action-strip {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     padding-inline: 18px;
@@ -762,5 +991,9 @@ body {
 
   .column-tab-grid {
     gap: 14px;
+  }
+
+  .record-highlight-card {
+    min-height: 220px;
   }
 }
