@@ -22,10 +22,9 @@ function toPolylinePoints(values, min, max, plotLeft, plotTop, plotRight, plotBo
     .join(" ");
 }
 
-export function LineChart({ data }) {
+export function LineChart({ data, height = 550 }) {
   const [hoveredPoint, setHoveredPoint] = useState(null);
   const width = 940;
-  const height = 550;
   const plotTop = 40;
   const plotBottom = height - 56;
   const plotLeft = 52;
