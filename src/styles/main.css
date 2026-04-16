@@ -606,6 +606,97 @@ body {
   font-size: 20px;
 }
 
+.column-tab-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 32px;
+}
+
+.column-tab-card {
+  min-height: 144px;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  text-align: center;
+  background: #2e2e2e;
+  color: #ffffff;
+}
+
+.column-tab-card h2 {
+  margin: 0;
+  color: var(--gold);
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 32px;
+  line-height: 1.05;
+  letter-spacing: 0.8px;
+}
+
+.column-tab-card span {
+  position: relative;
+  margin-top: 10px;
+  padding-top: 8px;
+  font-size: 18px;
+}
+
+.column-tab-card span::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 56px;
+  height: 1px;
+  background: #ffffff;
+  transform: translateX(-50%);
+}
+
+.column-article-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px 8px;
+}
+
+.column-article-card {
+  animation: fade-in 0.45s ease;
+}
+
+.column-article-card img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+}
+
+.column-article-date {
+  margin-top: 8px;
+  color: var(--orange);
+  font-size: 15px;
+}
+
+.column-article-card h3 {
+  margin: 6px 0 4px;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.column-article-card p {
+  margin: 0;
+  color: var(--orange);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.column-load-more {
+  justify-self: center;
+  margin-top: 6px;
+  padding: 14px 28px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ffcc4c 0%, #ff963c 100%);
+  color: #ffffff;
+  font-weight: 700;
+}
+
 .record-highlight-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -862,6 +953,11 @@ body {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .column-tab-grid,
+  .column-article-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .record-highlight-grid,
   .diary-grid {
     grid-template-columns: 1fr;
@@ -891,6 +987,10 @@ body {
 
   .scroll-top-button {
     right: 8px;
+  }
+
+  .column-tab-grid {
+    gap: 14px;
   }
 
   .record-highlight-card {
