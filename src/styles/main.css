@@ -27,7 +27,7 @@ body {
 .app-shell {
   max-width: 1120px;
   margin: 0 auto;
-  padding: 20px 16px 40px;
+  padding: 0 16px 40px;
 }
 
 .app-header {
@@ -37,58 +37,272 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(8px);
+  gap: 16px;
+  min-height: 64px;
+  padding: 0 24px;
+  background: #414141;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
 }
 
 .brand {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  min-width: 116px;
+  padding-top: 2px;
+}
+
+.brand-word {
   font-family: "Bebas Neue", sans-serif;
   letter-spacing: 2px;
   font-size: 32px;
-  color: #1f3f46;
+  color: var(--orange);
+}
+
+.brand-accent {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 2px;
+  height: 3px;
+  background: var(--orange);
+  clip-path: polygon(0 0, 78% 0, 73% 100%, 0 100%);
 }
 
 .main-nav {
   display: flex;
-  gap: 8px;
+  gap: 4px;
+  margin-left: auto;
 }
 
 .nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   text-decoration: none;
-  color: var(--ink);
-  padding: 8px 14px;
-  border-radius: 999px;
-  background: rgba(25, 25, 25, 0.06);
-  transition: transform 0.2s ease, background 0.2s ease;
+  color: rgba(255, 255, 255, 0.92);
+  padding: 20px 12px 18px;
+  border-bottom: 4px solid transparent;
+  transition: color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
 }
 
 .nav-link:hover {
-  transform: translateY(-1px);
+  color: #ffffff;
 }
 
 .nav-link.is-active {
+  border-color: var(--orange);
+}
+
+.nav-label {
+  font-size: 15px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.nav-icon {
+  position: relative;
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  color: var(--orange);
+}
+
+.nav-icon::before,
+.nav-icon::after {
+  content: "";
+  position: absolute;
+}
+
+.nav-icon.is-record::before {
+  inset: 2px 3px;
+  border: 2px solid currentColor;
+  border-radius: 2px;
+}
+
+.nav-icon.is-record::after {
+  left: 6px;
+  top: 5px;
+  width: 6px;
+  height: 2px;
+  background: currentColor;
+  box-shadow: 0 4px 0 currentColor, 0 8px 0 currentColor;
+}
+
+.nav-icon.is-challenge::before {
+  left: 4px;
+  top: 2px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+}
+
+.nav-icon.is-challenge::after {
+  left: 7px;
+  bottom: 1px;
+  width: 4px;
+  height: 6px;
+  border-left: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+}
+
+.nav-icon.is-column::before {
+  inset: 1px 3px;
+  border: 2px solid currentColor;
+  border-radius: 2px;
+}
+
+.nav-icon.is-column::after {
+  top: 4px;
+  left: 6px;
+  width: 6px;
+  height: 8px;
+  border-left: 2px solid currentColor;
+}
+
+.header-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 4px;
+}
+
+.header-tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 64px;
+  padding: 0 8px;
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.notice-tool {
+  position: relative;
+}
+
+.nav-icon.is-notice::before {
+  left: 4px;
+  top: 2px;
+  width: 10px;
+  height: 12px;
+  border: 2px solid currentColor;
+  border-bottom-left-radius: 7px;
+  border-bottom-right-radius: 7px;
+  border-top-left-radius: 7px;
+  border-top-right-radius: 7px;
+  clip-path: polygon(15% 0, 85% 0, 100% 85%, 0 85%);
+}
+
+.nav-icon.is-notice::after {
+  left: 7px;
+  bottom: 0;
+  width: 4px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 999px;
+}
+
+.notice-badge {
+  position: absolute;
+  top: 12px;
+  right: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--orange);
   color: #ffffff;
-  background: linear-gradient(120deg, var(--orange), #eb6f3e);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.menu-tool {
+  width: 42px;
+  justify-content: center;
+}
+
+.menu-lines {
+  display: grid;
+  gap: 4px;
+}
+
+.menu-lines span {
+  width: 18px;
+  height: 2px;
+  background: var(--orange);
+  display: block;
 }
 
 .page-content {
-  margin-top: 20px;
+  margin-top: 12px;
   display: grid;
   gap: 20px;
 }
 
-.hero-panel {
+.top-hero {
   display: grid;
-  grid-template-columns: 240px 1fr;
-  align-items: center;
-  gap: 24px;
-  background: linear-gradient(130deg, #27333f 0%, #406d86 70%, #51a8b1 100%);
-  color: #ffffff;
-  border-radius: 26px;
-  padding: 24px;
+  grid-template-columns: minmax(280px, 1fr) minmax(420px, 1.4fr);
+  background: #ffffff;
+  overflow: hidden;
   animation: fade-in 0.45s ease;
+}
+
+.top-hero-visual,
+.top-hero-chart {
+  position: relative;
+  min-height: 316px;
+}
+
+.top-hero-visual {
+  background: #ff6c21;
+}
+
+.top-hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.top-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(255, 108, 33, 0.18), rgba(255, 108, 33, 0.55));
+}
+
+.top-hero-chart {
+  background: #2e2e2e;
+  padding: 18px 22px 10px;
+}
+
+.top-hero-chart-header {
+  position: absolute;
+  top: 18px;
+  left: 22px;
+  z-index: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  color: #ffffff;
+}
+
+.top-hero-chart-header h2 {
+  margin: 0;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 28px;
+  letter-spacing: 1px;
+}
+
+.top-hero-chart-header p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--gold);
 }
 
 .hero-progress {
@@ -98,6 +312,13 @@ body {
   background: conic-gradient(var(--gold) calc(var(--progress) * 1%), rgba(255, 255, 255, 0.2) 0);
   display: grid;
   place-items: center;
+}
+
+.hero-progress-floating {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .hero-progress-inner {
@@ -120,45 +341,58 @@ body {
   line-height: 1;
 }
 
-.hero-metrics h1 {
-  margin: 0;
-  font-size: 46px;
+
+.top-action-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+  justify-items: center;
+  padding: 28px 40px 18px;
+  background: #ffffff;
+}
+
+.action-chip {
+  width: 116px;
+  aspect-ratio: 1;
+  border: 0;
+  background: linear-gradient(180deg, #ffcc4c 0%, #ff963c 100%);
+  clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 6px;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.action-chip-icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.action-chip-label {
+  font-size: 20px;
   font-family: "Bebas Neue", sans-serif;
   letter-spacing: 1px;
-}
-
-.hero-metrics p {
-  margin: 8px 0 0;
-  font-size: 18px;
-}
-
-.hero-metric-list {
-  margin: 14px 0 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.hero-metric-list li {
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.18);
-  padding: 5px 10px;
-  font-size: 13px;
 }
 
 .meal-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
+  gap: 8px;
+}
+
+.top-meal-history {
+  position: relative;
+  padding: 6px 22px 0;
+  background: #ffffff;
 }
 
 .meal-card {
   position: relative;
-  border-radius: 14px;
+  border-radius: 0;
   overflow: hidden;
-  min-height: 144px;
+  min-height: 234px;
   animation: fade-in 0.45s ease;
 }
 
@@ -172,13 +406,13 @@ body {
 .meal-tag {
   position: absolute;
   left: 0;
-  bottom: 12px;
+  bottom: 0;
   background: var(--gold);
   color: #222;
   font-family: "Bebas Neue", sans-serif;
   letter-spacing: 1px;
   padding: 4px 10px;
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .section-block {
@@ -195,16 +429,36 @@ body {
 }
 
 .chart-wrap {
-  background: #2a2a2a;
+  position: relative;
+  background: transparent;
   color: white;
-  border-radius: 14px;
-  padding: 14px;
+  border-radius: 0;
+  padding: 38px 0 0;
 }
 
-.chart-legend {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
+.chart-tooltip {
+  position: absolute;
+  transform: translate(-50%, calc(-100% - 12px));
+  min-width: 92px;
+  padding: 8px 10px;
+  border: 1px solid;
+  border-radius: 10px;
+  background: rgba(28, 28, 28, 0.92);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.chart-tooltip-month {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.chart-tooltip-value {
+  margin-top: 2px;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 20px;
+  letter-spacing: 0.4px;
 }
 
 .legend-item {
@@ -234,71 +488,97 @@ body {
   display: block;
 }
 
+.chart-grid-line {
+  stroke: rgba(255, 255, 255, 0.15);
+  stroke-width: 1;
+}
+
+.chart-horizontal-grid-line {
+  stroke: rgba(255, 255, 255, 0.1);
+  stroke-width: 1;
+}
+
+.chart-axis-label {
+  fill: rgba(255, 255, 255, 0.76);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.chart-axis-label-left {
+  fill: #8fe9d0;
+}
+
+.chart-axis-label-right {
+  fill: var(--gold);
+}
+
+.chart-side-label {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 18px;
+  letter-spacing: 0.8px;
+}
+
+.chart-side-label-left {
+  fill: #8fe9d0;
+}
+
+.chart-side-label-right {
+  fill: var(--gold);
+}
+
+.chart-month-label {
+  fill: rgba(255, 255, 255, 0.7);
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
 .line {
   fill: none;
-  stroke-width: 2;
+  stroke-width: 3;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
 .line-weight {
-  stroke: var(--orange);
+  stroke: var(--gold);
 }
 
 .line-fat {
-  stroke: var(--blue);
+  stroke: #8fe9d0;
 }
 
-.recommend-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
+.line-point {
+  stroke-width: 2;
+  transition: r 0.18s ease, filter 0.18s ease;
+  cursor: pointer;
 }
 
-.recommend-card {
-  position: relative;
-  border-radius: 16px;
-  overflow: hidden;
-  min-height: 220px;
-  background: #223;
+.line-point-weight {
+  fill: var(--gold);
+  stroke: #2e2e2e;
 }
 
-.recommend-card img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+.line-point-fat {
+  fill: #8fe9d0;
+  stroke: #2e2e2e;
 }
 
-.recommend-overlay {
+.line-point.is-active {
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.2));
+}
+
+.scroll-top-button {
   position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.64));
-}
-
-.recommend-content {
-  position: absolute;
-  inset: auto 14px 14px;
-  color: #fff;
-}
-
-.recommend-content h3 {
-  margin: 0;
-  color: var(--gold);
-  font-family: "Bebas Neue", sans-serif;
-  letter-spacing: 1px;
-  font-size: 34px;
-  line-height: 1;
-}
-
-.recommend-content p {
-  margin: 4px 0 7px;
-  font-size: 13px;
-}
-
-.recommend-tags {
-  font-size: 12px;
-  color: #d8f9fa;
+  right: -12px;
+  bottom: 18px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid #b8b8b8;
+  background: #ffffff;
+  color: #ff963c;
+  font-size: 20px;
 }
 
 .placeholder-note {
@@ -319,30 +599,68 @@ body {
 }
 
 @media (max-width: 768px) {
-  .hero-panel {
-    grid-template-columns: 1fr;
-    justify-items: center;
-    text-align: center;
+  .app-shell {
+    padding-inline: 8px;
   }
 
-  .hero-metrics h1 {
-    font-size: 38px;
+  .top-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .app-header {
+    padding: 0 12px;
+    gap: 10px;
+    overflow-x: auto;
+  }
+
+  .brand-word {
+    font-size: 28px;
+  }
+
+  .top-hero-visual,
+  .top-hero-chart {
+    min-height: 260px;
   }
 
   .main-nav {
-    gap: 6px;
+    gap: 0;
   }
 
   .nav-link {
-    padding: 7px 10px;
-    font-size: 13px;
+    padding: 20px 8px 16px;
+  }
+
+  .nav-label {
+    display: none;
+  }
+
+  .header-tool .nav-label {
+    display: none;
   }
 
   .meal-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .recommend-grid {
-    grid-template-columns: 1fr;
+  .top-action-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding-inline: 18px;
+    gap: 14px;
+  }
+
+  .action-chip {
+    width: 104px;
+  }
+
+  .top-meal-history {
+    padding-inline: 12px;
+  }
+
+  .meal-card {
+    min-height: 180px;
+  }
+
+  .scroll-top-button {
+    right: 8px;
   }
 }
