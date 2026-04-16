@@ -6,33 +6,32 @@ export const topSummary = {
 };
 
 export const mealCards = [
-  { id: "morning", timeLabel: "Morning", image: "./画像/m01.jpg" },
-  { id: "lunch", timeLabel: "Lunch", image: "./画像/l01.jpg" },
-  { id: "dinner", timeLabel: "Dinner", image: "./画像/d01.jpg" },
-  { id: "snack", timeLabel: "Snack", image: "./画像/s01.jpg" },
+  { id: "morning", timeLabel: "Morning", image: "./画像/m01.jpg", stamp: "05.21.Morning" },
+  { id: "lunch", timeLabel: "Lunch", image: "./画像/l03.jpg", stamp: "05.21.Lunch" },
+  { id: "dinner", timeLabel: "Dinner", image: "./画像/d01.jpg", stamp: "05.21.Dinner" },
+  { id: "snack", timeLabel: "Snack", image: "./画像/l01.jpg", stamp: "05.21.Snack" },
 ];
 
-export const recommendCards = [
+export const topActions = [
   {
-    id: "body-record",
-    title: "BODY RECORD",
-    subtitle: "自分のカラダの記録",
-    image: "./画像/MyRecommend-1.jpg",
-    tags: ["#Weight", "#Body fat"],
+    id: "morning",
+    title: "Morning",
+    icon: "☀",
   },
   {
-    id: "my-exercise",
-    title: "MY EXERCISE",
-    subtitle: "自分の運動の記録",
-    image: "./画像/MyRecommend-2.jpg",
-    tags: ["#Running", "#Stretch"],
+    id: "lunch",
+    title: "Lunch",
+    icon: "🍽",
   },
   {
-    id: "my-diary",
-    title: "MY DIARY",
-    subtitle: "自分の日記",
-    image: "./画像/MyRecommend-3.jpg",
-    tags: ["#Self-care", "#Mood"],
+    id: "dinner",
+    title: "Dinner",
+    icon: "🍴",
+  },
+  {
+    id: "snack",
+    title: "Snack",
+    icon: "☕",
   },
 ];
 
