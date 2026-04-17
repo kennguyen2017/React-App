@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
+import { AuthPage } from "./pages/AuthPage.jsx";
 import { Layout } from "./components/Layout.jsx";
 import { ColumnPage } from "./pages/ColumnPage.jsx";
 import { RecordPage } from "./pages/RecordPage.jsx";
 import { TopPage } from "./pages/TopPage.jsx";
 
 function normalizeRoute(hashValue) {
-  if (hashValue === "#/my-record" || hashValue === "#/column" || hashValue === "#/top") {
+  if (hashValue === "#/my-record" || hashValue === "#/column" || hashValue === "#/top" || hashValue === "#/auth") {
     return hashValue;
   }
   return "#/top";
@@ -36,6 +37,10 @@ export function App() {
 
     if (route === "#/column") {
       return <ColumnPage />;
+    }
+
+    if (route === "#/auth") {
+      return <AuthPage />;
     }
 
     return <TopPage />;
