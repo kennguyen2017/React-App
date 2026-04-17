@@ -5,12 +5,12 @@ const navItems = [
 ];
 
 const footerLinks = [
-  "会員登録",
-  "運営会社",
-  "利用規約",
-  "個人情報の取扱について",
-  "特定商取引法に基づく表記",
-  "お問い合わせ",
+  { label: "会員登録", href: "#/auth" },
+  { label: "運営会社", href: "#/top" },
+  { label: "利用規約", href: "#/top" },
+  { label: "個人情報の取扱について", href: "#/top" },
+  { label: "特定商取引法に基づく表記", href: "#/top" },
+  { label: "お問い合わせ", href: "#/top" },
 ];
 
 export function Layout({ activeRoute, children }) {
@@ -53,9 +53,9 @@ export function Layout({ activeRoute, children }) {
       <main className="page-content">{children}</main>
       <footer className="app-footer">
         <nav className="footer-nav" aria-label="Footer navigation">
-          {footerLinks.map((label) => (
-            <a className="footer-link" href="#/top" key={label}>
-              {label}
+          {footerLinks.map((link) => (
+            <a className="footer-link" href={link.href} key={link.label}>
+              {link.label}
             </a>
           ))}
         </nav>
