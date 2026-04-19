@@ -1,7 +1,30 @@
 import { useEffect, useState } from "react";
 import { GOOGLE_SSO_INTENTS, googleSsoService } from "../services/googleSsoService.js";
+import { memberAuthService } from "../services/memberAuthService.js";
 
 const callbackFields = ["code", "state", "scope", "authuser", "prompt"];
+
+const AUTH_MODES = {
+  login: "login",
+  signup: "signup",
+};
+
+function createInitialLoginForm() {
+  return {
+    email: "",
+    password: "",
+  };
+}
+
+function createInitialRegistrationForm() {
+  return {
+    fullName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    avatarUrl: "",
+  };
+}
 
 function hasCallbackPayload(searchParams) {
   return callbackFields.some((field) => searchParams.has(field));
@@ -24,10 +47,87 @@ function AuthActionCard({ title, description, buttonLabel, onAction }) {
   );
 }
 
-export function AuthPage() {
+export function AuthPage({ onAuthenticated }) {
+  const [mode, setMode] = useState(AUTH_MODES.login);
+  const [loginForm, setLoginForm] = useState(() => createInitialLoginForm());
+  const [registrationForm, setRegistrationForm] = useState(() => createInitialRegistrationForm());
   const [authState, setAuthState] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  function handleLoginFieldChange(event) {
+    const { name, value } = event.target;
+    setLoginForm((currentForm) => ({
+      ...currentForm,
+      [name]: value,
+    }));
+  }
+
+  function handleRegistrationFieldChange(event) {
+    const { name, value } = event.target;
+    setRegistrationForm((currentForm) => ({
+      ...currentForm,
+      [name]: value,
+    }));
+  }
+
+  async function handleLogin(event) {
+    event.preventDefault();
+
+    try {
+      setIsLoggingIn(true);
+      const nextState = await memberAuthService.loginMember({
+        email: loginForm.email.trim(),
+        password: loginForm.password,
+      });
+
+      memberAuthService.saveSession(nextState.member);
+      setErrorMessage("");
+      setSuccessMessage(nextState.message);
+      onAuthenticated?.(nextState.member);
+    } catch (error) {
+      setErrorMessage(error.message || "Failed to login member.");
+      setSuccessMessage("");
+    } finally {
+      setIsLoggingIn(false);
+    }
+  }
+
+  async function handleRegisterMember(event) {
+    event.preventDefault();
+
+    if (registrationForm.password !== registrationForm.confirmPassword) {
+      setErrorMessage("Password confirmation does not match.");
+      setSuccessMessage("");
+      return;
+    }
+
+    try {
+      setIsRegistering(true);
+      const nextState = await memberAuthService.registerMember({
+        email: registrationForm.email.trim(),
+        fullName: registrationForm.fullName.trim(),
+        password: registrationForm.password,
+        avatarUrl: registrationForm.avatarUrl,
+      });
+      setErrorMessage("");
+      setSuccessMessage("Account created successfully. Sign in with your new email and password.");
+      setMode(AUTH_MODES.login);
+      setLoginForm({
+        email: nextState.member.email,
+        password: "",
+      });
+      setRegistrationForm(createInitialRegistrationForm());
+    } catch (error) {
+      setErrorMessage(error.message || "Failed to register member.");
+      setSuccessMessage("");
+    } finally {
+      setIsRegistering(false);
+    }
+  }
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -46,6 +146,7 @@ export function AuthPage() {
         });
         setAuthState(nextState);
         setErrorMessage("");
+        setSuccessMessage(nextState.message ?? "Google callback reached the frontend.");
       } catch (error) {
         if (error.name === "AbortError") {
           return;
@@ -72,8 +173,10 @@ export function AuthPage() {
       const nextState = await googleSsoService.start(intent);
       setAuthState(nextState);
       setErrorMessage("");
+      setSuccessMessage(nextState.message ?? "Google auth skeleton responded successfully.");
     } catch (error) {
       setErrorMessage("Backend Google auth skeleton is unavailable. Start the backend before testing auth.");
+      setSuccessMessage("");
     } finally {
       setIsProcessing(false);
     }
@@ -81,101 +184,118 @@ export function AuthPage() {
 
   const statusValue = errorMessage
     ? "Backend unavailable"
+    : isLoggingIn
+      ? "Signing in"
+    : isRegistering
+      ? "Creating account"
     : isProcessing
       ? "Syncing backend"
-      : authState?.status ?? "Backend skeleton connected";
+      : successMessage
+        ? "Ready"
+        : "Login required";
 
   const statusNote = errorMessage
     ? errorMessage
-    : authState?.message ?? "Intent endpoints and callback contract are now connected to backend placeholder routes.";
+    : successMessage || authState?.message || "Sign in with an existing member account before accessing the Healthy pages.";
 
   return (
-    <>
-      <section className="auth-hero section-block">
-        <div>
-          <div className="auth-kicker">AUTH READY</div>
-          <h1>Google SSO</h1>
-          <p>
-            Frontend registration and login actions are now wired to backend placeholder endpoints. Real OAuth exchange
-            and account linking are still intentionally out of scope for this phase.
-          </p>
+    <div className="auth-gate-shell">
+      <section className="auth-gate-card">
+        <div className="auth-gate-lock" aria-hidden="true">
+          🔒
         </div>
-        <div className="auth-status-card">
-          <div className="auth-status-label">Current integration status</div>
-          <div className="auth-status-value">{statusValue}</div>
-          <div className="auth-status-note">{statusNote}</div>
+        <h1>{mode === AUTH_MODES.login ? "Login" : "Sign Up"}</h1>
+        <p className="auth-gate-subtitle">
+          {mode === AUTH_MODES.login ? "Sign in to your account" : "Create a new Healthy member account"}
+        </p>
+
+        <div className="auth-gate-status">
+          <strong>{statusValue}</strong>
+          <span>{statusNote}</span>
         </div>
+
+        <button className="google-auth-button auth-gate-google" type="button" onClick={() => runGoogleSso(mode === AUTH_MODES.login ? GOOGLE_SSO_INTENTS.login : GOOGLE_SSO_INTENTS.register)}>
+          <span className="google-auth-mark" aria-hidden="true">
+            G
+          </span>
+          <span>{mode === AUTH_MODES.login ? "Login with Google" : "Continue with Google"}</span>
+        </button>
+
+        <div className="auth-gate-divider">
+          <span>or</span>
+        </div>
+
+        {mode === AUTH_MODES.login ? (
+          <form className="auth-gate-form" onSubmit={handleLogin}>
+            <label className="auth-gate-field">
+              <span>Email</span>
+              <input name="email" type="email" value={loginForm.email} onChange={handleLoginFieldChange} placeholder="Email" required />
+            </label>
+
+            <label className="auth-gate-field">
+              <span>Password</span>
+              <input name="password" type="password" value={loginForm.password} onChange={handleLoginFieldChange} placeholder="Password" minLength="8" required />
+            </label>
+
+            <button className="auth-gate-submit" type="submit" disabled={isLoggingIn}>
+              {isLoggingIn ? "Logging in..." : "Login"}
+            </button>
+          </form>
+        ) : (
+          <form className="auth-gate-form" onSubmit={handleRegisterMember}>
+            <label className="auth-gate-field">
+              <span>Full name</span>
+              <input name="fullName" type="text" value={registrationForm.fullName} onChange={handleRegistrationFieldChange} placeholder="Full name" required />
+            </label>
+
+            <label className="auth-gate-field">
+              <span>Email</span>
+              <input name="email" type="email" value={registrationForm.email} onChange={handleRegistrationFieldChange} placeholder="Email" required />
+            </label>
+
+            <label className="auth-gate-field">
+              <span>Password</span>
+              <input name="password" type="password" value={registrationForm.password} onChange={handleRegistrationFieldChange} placeholder="Password" minLength="8" required />
+            </label>
+
+            <label className="auth-gate-field">
+              <span>Confirm password</span>
+              <input name="confirmPassword" type="password" value={registrationForm.confirmPassword} onChange={handleRegistrationFieldChange} placeholder="Confirm password" minLength="8" required />
+            </label>
+
+            <label className="auth-gate-field">
+              <span>Avatar URL</span>
+              <input name="avatarUrl" type="url" value={registrationForm.avatarUrl} onChange={handleRegistrationFieldChange} placeholder="https://..." />
+            </label>
+
+            <button className="auth-gate-submit" type="submit" disabled={isRegistering}>
+              {isRegistering ? "Creating account..." : "Create account"}
+            </button>
+          </form>
+        )}
+
+        <p className="auth-gate-switch">
+          {mode === AUTH_MODES.login ? "Don't have an account? " : "Already have an account? "}
+          <button
+            className="auth-gate-switch-button"
+            type="button"
+            onClick={() => {
+              setMode(mode === AUTH_MODES.login ? AUTH_MODES.signup : AUTH_MODES.login);
+              setErrorMessage("");
+              setSuccessMessage("");
+            }}
+          >
+            {mode === AUTH_MODES.login ? "Sign up" : "Login"}
+          </button>
+        </p>
+
+        {authState ? (
+          <div className="auth-gate-footnote">
+            <div>Google callback fields ready: {callbackFields.join(", ")}</div>
+            <div>{authState.message}</div>
+          </div>
+        ) : null}
       </section>
-
-      <section className="auth-grid">
-        <AuthActionCard
-          title="Register with Google"
-          description="Prepare the Google sign-up entry point and preserve the user intent for backend OAuth callback handling."
-          buttonLabel="Continue with Google"
-          onAction={() => runGoogleSso(GOOGLE_SSO_INTENTS.register)}
-        />
-        <AuthActionCard
-          title="Login with Google"
-          description="Prepare the Google sign-in entry point and keep the login state ready for backend verification later."
-          buttonLabel="Sign in with Google"
-          onAction={() => runGoogleSso(GOOGLE_SSO_INTENTS.login)}
-        />
-      </section>
-
-      <section className="auth-flow-grid">
-        <article className="section-block auth-flow-card">
-          <h2>Callback contract placeholder</h2>
-          <p>The frontend is ready to read the following callback params after backend OAuth redirect is added:</p>
-          <div className="callback-chip-row">
-            {callbackFields.map((field) => (
-              <span className="callback-chip" key={field}>
-                {field}
-              </span>
-            ))}
-          </div>
-        </article>
-
-        <article className="section-block auth-flow-card">
-          <h2>Service boundary</h2>
-          <p>
-            Google auth logic is isolated behind a service interface, so backend endpoints can be added later
-            without rewriting the screen.
-          </p>
-          <code className="auth-inline-contract">googleSsoService.start(intent)</code>
-          <code className="auth-inline-contract">googleSsoService.handleCallback(params)</code>
-        </article>
-      </section>
-
-      {authState ? (
-        <section className="section-block auth-result-panel">
-          <div className="auth-result-heading">Latest action</div>
-          <div className="auth-result-row">
-            <span>Provider</span>
-            <strong>{authState.provider}</strong>
-          </div>
-          <div className="auth-result-row">
-            <span>Intent</span>
-            <strong>{authState.intent}</strong>
-          </div>
-          <div className="auth-result-row">
-            <span>Status</span>
-            <strong>{authState.status}</strong>
-          </div>
-          {authState.state ? (
-            <div className="auth-result-row">
-              <span>State</span>
-              <strong>{authState.state}</strong>
-            </div>
-          ) : null}
-          {authState.authorizationUrl ? (
-            <div className="auth-result-row">
-              <span>Redirect URL</span>
-              <strong>{authState.authorizationUrl}</strong>
-            </div>
-          ) : null}
-          <p>{authState.message}</p>
-        </section>
-      ) : null}
-    </>
+    </div>
   );
 }

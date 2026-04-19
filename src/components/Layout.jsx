@@ -5,7 +5,7 @@ const navItems = [
 ];
 
 const footerLinks = [
-  { label: "会員登録", href: "#/auth" },
+  { label: "トップページ", href: "#/top" },
   { label: "運営会社", href: "#/top" },
   { label: "利用規約", href: "#/top" },
   { label: "個人情報の取扱について", href: "#/top" },
@@ -13,7 +13,7 @@ const footerLinks = [
   { label: "お問い合わせ", href: "#/top" },
 ];
 
-export function Layout({ activeRoute, children }) {
+export function Layout({ activeRoute, currentMember, children, onLogout }) {
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -36,10 +36,14 @@ export function Layout({ activeRoute, children }) {
         </nav>
 
         <div className="header-tools">
+          <div className="header-member-chip">{currentMember?.fullName ?? "Member"}</div>
           <button className="header-tool notice-tool" type="button" aria-label="Notifications">
             <span className="nav-icon is-notice" aria-hidden="true"></span>
             <span className="nav-label">お知らせ</span>
             <span className="notice-badge">1</span>
+          </button>
+          <button className="header-tool logout-tool" type="button" onClick={onLogout}>
+            <span className="nav-label">ログアウト</span>
           </button>
           <button className="header-tool menu-tool" type="button" aria-label="Menu">
             <span className="menu-lines" aria-hidden="true">
