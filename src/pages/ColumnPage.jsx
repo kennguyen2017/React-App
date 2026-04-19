@@ -17,6 +17,7 @@ export function ColumnPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [formData, setFormData] = useState(() => createInitialColumnForm());
@@ -73,6 +74,7 @@ export function ColumnPage() {
       const article = await columnService.createColumn(formData);
       await loadInitialColumns();
       setFormData(createInitialColumnForm());
+      setIsCreateModalOpen(false);
       setSuccessMessage(`Created column: ${article.title}`);
     } catch (error) {
       setErrorMessage(error.message || "Failed to create column.");
@@ -120,46 +122,67 @@ export function ColumnPage() {
 
   return (
     <>
-      <section className="entry-form-panel">
-        <div className="entry-form-header">
-          <div>
-            <p className="entry-form-kicker">Column Editor</p>
-            <h2>Create a new health column</h2>
-          </div>
-          <p className="entry-inline-note">A successful submit is inserted into the backend `columns` table immediately.</p>
+      <section className="page-action-bar">
+        <div>
+          <p className="entry-form-kicker">Column Editor</p>
+          <h2 className="page-action-title">Health columns</h2>
         </div>
-
-        <form className="entry-form-grid" onSubmit={handleCreateColumn}>
-          <label className="entry-field">
-            <span>User ID</span>
-            <input className="entry-input" name="userId" type="number" min="1" value={formData.userId} onChange={handleFormChange} />
-          </label>
-
-          <label className="entry-field">
-            <span>Title</span>
-            <input className="entry-input" name="title" type="text" value={formData.title} onChange={handleFormChange} required />
-          </label>
-
-          <label className="entry-field entry-field-wide">
-            <span>Image URL</span>
-            <input className="entry-input" name="imageUrl" type="url" value={formData.imageUrl} onChange={handleFormChange} placeholder="https://..." />
-          </label>
-
-          <label className="entry-field entry-field-full">
-            <span>Content</span>
-            <textarea className="entry-textarea" name="content" value={formData.content} onChange={handleFormChange} rows="6" required />
-          </label>
-
-          <div className="entry-actions entry-field-full">
-            <button className="column-load-more" type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : "Create Column"}
-            </button>
-          </div>
-        </form>
-
-        {successMessage ? <p className="entry-feedback entry-feedback-success">{successMessage}</p> : null}
-        {errorMessage ? <p className="entry-feedback entry-feedback-error">{errorMessage}</p> : null}
+        <button className="column-load-more" type="button" onClick={() => setIsCreateModalOpen(true)}>
+          New Column
+        </button>
       </section>
+
+      {successMessage ? <p className="entry-feedback entry-feedback-success">{successMessage}</p> : null}
+      {errorMessage ? <p className="entry-feedback entry-feedback-error">{errorMessage}</p> : null}
+
+      {isCreateModalOpen ? (
+        <div className="entry-modal-overlay" onClick={() => setIsCreateModalOpen(false)} role="presentation">
+          <section className="entry-modal" role="dialog" aria-modal="true" aria-labelledby="create-column-title" onClick={(event) => event.stopPropagation()}>
+            <div className="entry-form-panel entry-modal-panel">
+              <div className="entry-form-header">
+                <div>
+                  <p className="entry-form-kicker">Column Editor</p>
+                  <h2 id="create-column-title">Create a new health column</h2>
+                </div>
+                <div className="entry-modal-actions">
+                  <p className="entry-inline-note">A successful submit is inserted into the backend columns table immediately.</p>
+                  <button className="entry-modal-close" type="button" onClick={() => setIsCreateModalOpen(false)} aria-label="Close create column form">
+                    Close
+                  </button>
+                </div>
+              </div>
+
+              <form className="entry-form-grid" onSubmit={handleCreateColumn}>
+                <label className="entry-field">
+                  <span>User ID</span>
+                  <input className="entry-input" name="userId" type="number" min="1" value={formData.userId} onChange={handleFormChange} />
+                </label>
+
+                <label className="entry-field">
+                  <span>Title</span>
+                  <input className="entry-input" name="title" type="text" value={formData.title} onChange={handleFormChange} required />
+                </label>
+
+                <label className="entry-field entry-field-wide">
+                  <span>Image URL</span>
+                  <input className="entry-input" name="imageUrl" type="url" value={formData.imageUrl} onChange={handleFormChange} placeholder="https://..." />
+                </label>
+
+                <label className="entry-field entry-field-full">
+                  <span>Content</span>
+                  <textarea className="entry-textarea" name="content" value={formData.content} onChange={handleFormChange} rows="6" required />
+                </label>
+
+                <div className="entry-actions entry-field-full">
+                  <button className="column-load-more" type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? "Saving..." : "Create Column"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </section>
+        </div>
+      ) : null}
 
       {!pageData ? <p className="top-page-status top-page-status-warning">{errorMessage}</p> : null}
 
