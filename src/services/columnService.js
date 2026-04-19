@@ -27,6 +27,17 @@ function normalizePagination(pagination) {
   };
 }
 
+function normalizeArticleDetail(article) {
+  return {
+    id: article?.id,
+    title: article?.title ?? "",
+    date: article?.date ?? "",
+    image: article?.image ?? "",
+    tags: Array.isArray(article?.tags) ? article.tags : [],
+    content: article?.content ?? "",
+  };
+}
+
 export const columnService = {
   async getColumns({ limit = 8, offset = 0, signal } = {}) {
     const searchParams = new URLSearchParams({
@@ -53,5 +64,29 @@ export const columnService = {
       articles: normalizeArticles(payload.articles),
       pagination: normalizePagination(payload.pagination),
     };
+  },
+
+  async createColumn({ userId, title, content, imageUrl }) {
+    const response = await fetch(`${API_BASE_URL}/api/v1/columns`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId: Number(userId),
+        title,
+        content,
+        imageUrl: imageUrl?.trim() ? imageUrl.trim() : null,
+      }),
+    });
+
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null);
+      throw new Error(payload?.message ?? `Failed to create column: ${response.status}`);
+    }
+
+    const payload = await response.json();
+    return normalizeArticleDetail(payload.article);
   },
 };

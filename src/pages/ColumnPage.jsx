@@ -3,45 +3,83 @@ import { columnService } from "../services/columnService.js";
 
 const INITIAL_VISIBLE_COUNT = 8;
 
+function createInitialColumnForm() {
+  return {
+    userId: "3",
+    title: "",
+    imageUrl: "",
+    content: "",
+  };
+}
+
 export function ColumnPage() {
   const [pageData, setPageData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [formData, setFormData] = useState(() => createInitialColumnForm());
+
+  async function loadInitialColumns(signal) {
+    try {
+      setIsLoading(true);
+      const result = await columnService.getColumns({
+        limit: INITIAL_VISIBLE_COUNT,
+        offset: 0,
+        signal,
+      });
+      setPageData(result);
+      setErrorMessage("");
+    } catch (error) {
+      if (error.name === "AbortError") {
+        return;
+      }
+
+      setPageData(null);
+      setErrorMessage("Backend Column API is unavailable. Start the backend before opening this page.");
+    } finally {
+      if (!signal?.aborted) {
+        setIsLoading(false);
+      }
+    }
+  }
 
   useEffect(() => {
     const abortController = new AbortController();
 
-    async function loadInitialColumns() {
-      try {
-        setIsLoading(true);
-        const result = await columnService.getColumns({
-          limit: INITIAL_VISIBLE_COUNT,
-          offset: 0,
-          signal: abortController.signal,
-        });
-        setPageData(result);
-        setErrorMessage("");
-      } catch (error) {
-        if (error.name === "AbortError") {
-          return;
-        }
-
-        setPageData(null);
-        setErrorMessage("Backend Column API is unavailable. Start the backend before opening this page.");
-      } finally {
-        if (!abortController.signal.aborted) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    loadInitialColumns();
+    loadInitialColumns(abortController.signal);
 
     return () => {
       abortController.abort();
     };
   }, []);
+
+  function handleFormChange(event) {
+    const { name, value } = event.target;
+    setFormData((currentFormData) => ({
+      ...currentFormData,
+      [name]: value,
+    }));
+  }
+
+  async function handleCreateColumn(event) {
+    event.preventDefault();
+
+    try {
+      setIsSubmitting(true);
+      setSuccessMessage("");
+      setErrorMessage("");
+      const article = await columnService.createColumn(formData);
+      await loadInitialColumns();
+      setFormData(createInitialColumnForm());
+      setSuccessMessage(`Created column: ${article.title}`);
+    } catch (error) {
+      setErrorMessage(error.message || "Failed to create column.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   async function handleLoadMore() {
     if (!pageData?.pagination?.hasMore || isLoadingMore) {
@@ -78,16 +116,55 @@ export function ColumnPage() {
     return <p className="top-page-status">Loading column data from backend...</p>;
   }
 
-  if (!pageData) {
-    return <p className="top-page-status top-page-status-warning">{errorMessage}</p>;
-  }
-
   const canLoadMore = pageData.pagination?.hasMore ?? false;
 
   return (
     <>
+      <section className="entry-form-panel">
+        <div className="entry-form-header">
+          <div>
+            <p className="entry-form-kicker">Column Editor</p>
+            <h2>Create a new health column</h2>
+          </div>
+          <p className="entry-inline-note">A successful submit is inserted into the backend `columns` table immediately.</p>
+        </div>
+
+        <form className="entry-form-grid" onSubmit={handleCreateColumn}>
+          <label className="entry-field">
+            <span>User ID</span>
+            <input className="entry-input" name="userId" type="number" min="1" value={formData.userId} onChange={handleFormChange} />
+          </label>
+
+          <label className="entry-field">
+            <span>Title</span>
+            <input className="entry-input" name="title" type="text" value={formData.title} onChange={handleFormChange} required />
+          </label>
+
+          <label className="entry-field entry-field-wide">
+            <span>Image URL</span>
+            <input className="entry-input" name="imageUrl" type="url" value={formData.imageUrl} onChange={handleFormChange} placeholder="https://..." />
+          </label>
+
+          <label className="entry-field entry-field-full">
+            <span>Content</span>
+            <textarea className="entry-textarea" name="content" value={formData.content} onChange={handleFormChange} rows="6" required />
+          </label>
+
+          <div className="entry-actions entry-field-full">
+            <button className="column-load-more" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : "Create Column"}
+            </button>
+          </div>
+        </form>
+
+        {successMessage ? <p className="entry-feedback entry-feedback-success">{successMessage}</p> : null}
+        {errorMessage ? <p className="entry-feedback entry-feedback-error">{errorMessage}</p> : null}
+      </section>
+
+      {!pageData ? <p className="top-page-status top-page-status-warning">{errorMessage}</p> : null}
+
       <section className="column-tab-grid">
-        {pageData.tabs.map((tab) => (
+        {pageData?.tabs.map((tab) => (
           <article className="column-tab-card" key={tab.id}>
             <h2>{tab.title}</h2>
             <span>{tab.subtitle}</span>
@@ -96,7 +173,7 @@ export function ColumnPage() {
       </section>
 
       <section className="column-article-grid">
-        {pageData.articles.map((article) => (
+        {pageData?.articles.map((article) => (
           <article className="column-article-card" key={`${article.date}-${article.title}`}>
             <img src={article.image} alt={article.title} />
             <div className="column-article-date">{article.date}</div>
@@ -106,13 +183,11 @@ export function ColumnPage() {
         ))}
       </section>
 
-      {canLoadMore ? (
+      {pageData && canLoadMore ? (
         <button className="column-load-more" type="button" onClick={handleLoadMore} disabled={isLoadingMore}>
           {isLoadingMore ? "読み込み中..." : "コラムをもっと見る"}
         </button>
       ) : null}
-
-      {errorMessage ? <p className="top-page-status top-page-status-warning">{errorMessage}</p> : null}
     </>
   );
 }
