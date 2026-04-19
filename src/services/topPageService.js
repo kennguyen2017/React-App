@@ -1,5 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8080";
-const TOP_PAGE_USER_ID = import.meta.env.VITE_TOP_PAGE_USER_ID ?? "3";
+import { API_BASE_URL, TOP_PAGE_USER_ID } from "../config/env.js";
 
 const ACTION_ICON_MAP = {
   sun: "☀",
