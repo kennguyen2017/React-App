@@ -856,8 +856,7 @@ body {
   display: grid;
   place-items: center;
   padding: 24px;
-  background: rgba(25, 25, 25, 0.45);
-  backdrop-filter: blur(6px);
+  background: rgba(25, 25, 25, 0.82);
 }
 
 .entry-modal {
@@ -867,6 +866,8 @@ body {
 }
 
 .entry-modal-panel {
+  background: var(--surface);
+  border: 1px solid rgba(25, 25, 25, 0.08);
   box-shadow: 0 28px 60px rgba(25, 25, 25, 0.24);
 }
 
