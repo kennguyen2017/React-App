@@ -1,9 +1,9 @@
+import { API_BASE_URL, buildFrontendRedirectUrl } from "../config/env.js";
+
 export const GOOGLE_SSO_INTENTS = {
   register: "register",
   login: "login",
 };
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8080";
 
 function getGoogleEndpoint(intent) {
   if (intent === GOOGLE_SSO_INTENTS.register) {
@@ -18,7 +18,7 @@ function getGoogleEndpoint(intent) {
 }
 
 function getRedirectUri() {
-  return `${window.location.origin}${window.location.pathname}#/auth`;
+  return buildFrontendRedirectUrl();
 }
 
 function normalizeStartResponse(payload, intent) {
