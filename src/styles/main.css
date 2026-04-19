@@ -968,6 +968,63 @@ body {
   line-height: 1.7;
 }
 
+.auth-register-card,
+.auth-member-card {
+  min-height: 100%;
+}
+
+.auth-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.auth-form-field {
+  display: grid;
+  gap: 8px;
+}
+
+.auth-form-field span {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.auth-form-field input {
+  min-height: 50px;
+  padding: 12px 14px;
+  border: 1px solid rgba(25, 25, 25, 0.12);
+  border-radius: 14px;
+  background: #fdfdfd;
+  color: var(--ink);
+  font: inherit;
+}
+
+.auth-form-field-full {
+  grid-column: 1 / -1;
+}
+
+.auth-submit-button {
+  min-height: 54px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ffcc4c 0%, #ff963c 100%);
+  color: #ffffff;
+  font: inherit;
+  font-weight: 700;
+}
+
+.auth-member-summary {
+  display: grid;
+  gap: 12px;
+}
+
+.auth-placeholder-copy {
+  color: var(--muted);
+  line-height: 1.7;
+}
+
 .google-auth-button {
   display: inline-flex;
   align-items: center;
@@ -1009,6 +1066,12 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+  margin-top: 16px;
+}
+
+.auth-secondary-actions {
+  display: grid;
+  gap: 12px;
   margin-top: 16px;
 }
 
@@ -1312,7 +1375,8 @@ body {
   .auth-hero,
   .auth-grid,
   .auth-flow-grid,
-  .entry-form-grid {
+  .entry-form-grid,
+  .auth-form {
     grid-template-columns: 1fr;
   }
 
