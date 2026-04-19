@@ -2,40 +2,178 @@ import { useEffect, useState } from "react";
 import { LineChart } from "../components/LineChart.jsx";
 import { myRecordService } from "../services/myRecordService.js";
 
+function getDefaultDatetimeLocal() {
+  return new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+}
+
+function buildNextVisibleDatetime(displayDate) {
+  if (!displayDate) {
+    return getDefaultDatetimeLocal();
+  }
+
+  const normalizedDate = displayDate.replace(/\./g, "-");
+  const nextDate = new Date(`${normalizedDate}T08:00:00`);
+
+  if (Number.isNaN(nextDate.getTime())) {
+    return getDefaultDatetimeLocal();
+  }
+
+  nextDate.setDate(nextDate.getDate() + 1);
+  return new Date(nextDate.getTime() - nextDate.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+}
+
+function createInitialForm() {
+  return {
+    userId: "3",
+    bodyName: "Body Record",
+    recordedAt: getDefaultDatetimeLocal(),
+    weight: "68.4",
+    bodyFatRate: "18.7",
+    bodyImageUrl: "",
+    exerciseTitle: "",
+    exerciseType: "",
+    exerciseCalories: "",
+    exercisePerformedAt: getDefaultDatetimeLocal(),
+    exerciseImageUrl: "",
+    diaryTitle: "",
+    diaryContent: "",
+    diaryImageUrl: "",
+  };
+}
+
+function toOptionalText(value) {
+  const normalizedValue = value.trim();
+  return normalizedValue ? normalizedValue : null;
+}
+
+function toIsoString(value) {
+  return new Date(value).toISOString();
+}
+
 export function RecordPage() {
+  const [selectedUserId, setSelectedUserId] = useState(3);
   const [pageData, setPageData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [formData, setFormData] = useState(() => createInitialForm());
+
+  async function loadRecordPage(userId, signal) {
+    try {
+      setIsLoading(true);
+      const result = await myRecordService.getMyRecord({ userId, signal });
+      setPageData(result);
+      setFormData((currentFormData) => ({
+        ...currentFormData,
+        userId: String(userId),
+        recordedAt: buildNextVisibleDatetime(result.chartDate),
+        exercisePerformedAt: buildNextVisibleDatetime(result.exerciseDate || result.chartDate),
+      }));
+      setErrorMessage("");
+    } catch (error) {
+      if (error.name === "AbortError") {
+        return;
+      }
+
+      setPageData(null);
+      setErrorMessage("Backend My Record API is unavailable. Start the backend before opening this page.");
+    } finally {
+      if (!signal?.aborted) {
+        setIsLoading(false);
+      }
+    }
+  }
 
   useEffect(() => {
     const abortController = new AbortController();
-
-    async function loadMyRecord() {
-      try {
-        setIsLoading(true);
-        const result = await myRecordService.getMyRecord({ signal: abortController.signal });
-        setPageData(result);
-        setErrorMessage("");
-      } catch (error) {
-        if (error.name === "AbortError") {
-          return;
-        }
-
-        setPageData(null);
-        setErrorMessage("Backend My Record API is unavailable. Start the backend before opening this page.");
-      } finally {
-        if (!abortController.signal.aborted) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    loadMyRecord();
+    loadRecordPage(selectedUserId, abortController.signal);
 
     return () => {
       abortController.abort();
     };
-  }, []);
+  }, [selectedUserId]);
+
+  function handleFormChange(event) {
+    const { name, value } = event.target;
+    setFormData((currentFormData) => ({
+      ...currentFormData,
+      [name]: value,
+    }));
+  }
+
+  async function handleLoadSelectedUser() {
+    const nextUserId = Number(formData.userId);
+    if (Number.isNaN(nextUserId) || nextUserId <= 0) {
+      setErrorMessage("User ID must be greater than 0.");
+      return;
+    }
+
+    setSelectedUserId(nextUserId);
+  }
+
+  async function handleCreateMyRecord(event) {
+    event.preventDefault();
+
+    const hasExercise = [
+      formData.exerciseTitle,
+      formData.exerciseType,
+      formData.exerciseCalories,
+      formData.exerciseImageUrl,
+    ].some((value) => value.trim() !== "");
+
+    const hasDiary = [formData.diaryTitle, formData.diaryContent, formData.diaryImageUrl].some((value) => value.trim() !== "");
+
+    try {
+      setIsSubmitting(true);
+      setSuccessMessage("");
+      setErrorMessage("");
+
+      const userId = Number(formData.userId);
+      await myRecordService.createMyRecord({
+        userId,
+        bodyRecord: {
+          name: formData.bodyName,
+          recordedAt: toIsoString(formData.recordedAt),
+          weight: Number(formData.weight),
+          bodyFatRate: Number(formData.bodyFatRate),
+          imageUrl: toOptionalText(formData.bodyImageUrl),
+        },
+        exercise: hasExercise
+          ? {
+              title: formData.exerciseTitle,
+              exerciseType: formData.exerciseType,
+              calories: Number(formData.exerciseCalories),
+              performedAt: toIsoString(formData.exercisePerformedAt),
+              imageUrl: toOptionalText(formData.exerciseImageUrl),
+            }
+          : null,
+        diary: hasDiary
+          ? {
+              title: formData.diaryTitle,
+              content: formData.diaryContent,
+              imageUrl: toOptionalText(formData.diaryImageUrl),
+            }
+          : null,
+      });
+
+      setSelectedUserId(userId);
+      await loadRecordPage(userId);
+      setFormData((currentFormData) => ({
+        ...createInitialForm(),
+        userId: currentFormData.userId,
+        recordedAt: currentFormData.recordedAt,
+        exercisePerformedAt: currentFormData.exercisePerformedAt,
+      }));
+      setIsCreateModalOpen(false);
+      setSuccessMessage("My Record data saved successfully.");
+    } catch (error) {
+      setErrorMessage(error.message || "Failed to create my record data.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   if (isLoading) {
     return <p className="top-page-status">Loading my record data from backend...</p>;
@@ -47,6 +185,139 @@ export function RecordPage() {
 
   return (
     <>
+      <section className="page-action-bar">
+        <div>
+          <p className="entry-form-kicker">My Record</p>
+          <h2 className="page-action-title">Track body condition and activity</h2>
+        </div>
+        <div className="entry-actions">
+          <button className="record-filter-chip" type="button" onClick={handleLoadSelectedUser}>
+            Load selected user
+          </button>
+          <button className="column-load-more" type="button" onClick={() => setIsCreateModalOpen(true)}>
+            New Record
+          </button>
+        </div>
+      </section>
+
+      {successMessage ? <p className="entry-feedback entry-feedback-success">{successMessage}</p> : null}
+      {errorMessage ? <p className="entry-feedback entry-feedback-error">{errorMessage}</p> : null}
+
+      {isCreateModalOpen ? (
+        <div className="entry-modal-overlay" onClick={() => setIsCreateModalOpen(false)} role="presentation">
+          <section className="entry-modal" role="dialog" aria-modal="true" aria-labelledby="create-record-title" onClick={(event) => event.stopPropagation()}>
+            <div className="entry-form-panel entry-modal-panel">
+              <div className="entry-form-header">
+                <div>
+                  <p className="entry-form-kicker">My Record</p>
+                  <h2 id="create-record-title">Save a new body record, with optional exercise and diary</h2>
+                </div>
+                <div className="entry-modal-actions">
+                  <p className="entry-inline-note">The submitted data is stored in body records, and can include related exercise and diary rows in the same save.</p>
+                  <button className="entry-modal-close" type="button" onClick={() => setIsCreateModalOpen(false)} aria-label="Close create record form">
+                    Close
+                  </button>
+                </div>
+              </div>
+
+              <form className="entry-form-grid" onSubmit={handleCreateMyRecord}>
+                <label className="entry-field">
+                  <span>User ID</span>
+                  <input className="entry-input" name="userId" type="number" min="1" value={formData.userId} onChange={handleFormChange} />
+                </label>
+
+                <label className="entry-field">
+                  <span>Body name</span>
+                  <input className="entry-input" name="bodyName" type="text" value={formData.bodyName} onChange={handleFormChange} required />
+                </label>
+
+                <label className="entry-field">
+                  <span>Recorded at</span>
+                  <input className="entry-input" name="recordedAt" type="datetime-local" value={formData.recordedAt} onChange={handleFormChange} required />
+                </label>
+
+                <label className="entry-field">
+                  <span>Weight (kg)</span>
+                  <input className="entry-input" name="weight" type="number" min="0.1" step="0.1" value={formData.weight} onChange={handleFormChange} required />
+                </label>
+
+                <label className="entry-field">
+                  <span>Body fat rate (%)</span>
+                  <input className="entry-input" name="bodyFatRate" type="number" min="0.1" step="0.1" value={formData.bodyFatRate} onChange={handleFormChange} required />
+                </label>
+
+                <label className="entry-field entry-field-wide">
+                  <span>Body image URL</span>
+                  <input className="entry-input" name="bodyImageUrl" type="url" value={formData.bodyImageUrl} onChange={handleFormChange} placeholder="https://..." />
+                </label>
+
+                <section className="entry-form-section entry-field-full">
+                  <div className="entry-form-section-header">
+                    <h3>Optional exercise</h3>
+                    <p>Fill this block only if you want an exercise row created together with the body record.</p>
+                  </div>
+                  <div className="entry-form-grid">
+                    <label className="entry-field">
+                      <span>Exercise title</span>
+                      <input className="entry-input" name="exerciseTitle" type="text" value={formData.exerciseTitle} onChange={handleFormChange} />
+                    </label>
+
+                    <label className="entry-field">
+                      <span>Duration label</span>
+                      <input className="entry-input" name="exerciseType" type="text" value={formData.exerciseType} onChange={handleFormChange} placeholder="20 min" />
+                    </label>
+
+                    <label className="entry-field">
+                      <span>Calories</span>
+                      <input className="entry-input" name="exerciseCalories" type="number" min="1" step="1" value={formData.exerciseCalories} onChange={handleFormChange} />
+                    </label>
+
+                    <label className="entry-field">
+                      <span>Performed at</span>
+                      <input className="entry-input" name="exercisePerformedAt" type="datetime-local" value={formData.exercisePerformedAt} onChange={handleFormChange} />
+                    </label>
+
+                    <label className="entry-field entry-field-wide">
+                      <span>Exercise image URL</span>
+                      <input className="entry-input" name="exerciseImageUrl" type="url" value={formData.exerciseImageUrl} onChange={handleFormChange} placeholder="https://..." />
+                    </label>
+                  </div>
+                </section>
+
+                <section className="entry-form-section entry-field-full">
+                  <div className="entry-form-section-header">
+                    <h3>Optional diary</h3>
+                    <p>Diary content is stored in the diaries table and shows up in the My Diary grid after reload.</p>
+                  </div>
+                  <div className="entry-form-grid">
+                    <label className="entry-field">
+                      <span>Diary title</span>
+                      <input className="entry-input" name="diaryTitle" type="text" value={formData.diaryTitle} onChange={handleFormChange} />
+                    </label>
+
+                    <label className="entry-field entry-field-wide">
+                      <span>Diary image URL</span>
+                      <input className="entry-input" name="diaryImageUrl" type="url" value={formData.diaryImageUrl} onChange={handleFormChange} placeholder="https://..." />
+                    </label>
+
+                    <label className="entry-field entry-field-full">
+                      <span>Diary content</span>
+                      <textarea className="entry-textarea" name="diaryContent" rows="5" value={formData.diaryContent} onChange={handleFormChange} />
+                    </label>
+                  </div>
+                </section>
+
+                <div className="entry-actions entry-field-full">
+                  <button className="column-load-more" type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? "Saving..." : "Save My Record"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </section>
+        </div>
+      ) : null}
+
       <section className="record-highlight-grid">
         {pageData.highlights.map((item) => (
           <article className="record-highlight-card" key={item.id}>

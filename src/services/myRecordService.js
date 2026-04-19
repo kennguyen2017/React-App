@@ -1,5 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8080";
-const MY_RECORD_USER_ID = import.meta.env.VITE_MY_RECORD_USER_ID ?? "3";
+import { API_BASE_URL } from "../config/env.js";
 
 function normalizeHighlights(items) {
   return (Array.isArray(items) ? items : []).map((item) => ({
@@ -41,9 +40,25 @@ function normalizeDiaryEntries(items) {
   }));
 }
 
+function normalizeMyRecordPage(payload) {
+  return {
+    highlights: normalizeHighlights(payload.highlights),
+    chartDate: payload.chartDate ?? "",
+    chartFilters: normalizeChartFilters(payload.chartFilters),
+    chartData: normalizeChartData(payload.chartData),
+    exerciseDate: payload.exerciseDate ?? "",
+    exerciseItems: normalizeExerciseItems(payload.exerciseItems),
+    diaryEntries: normalizeDiaryEntries(payload.diaryEntries),
+  };
+}
+
 export const myRecordService = {
-  async getMyRecord({ signal } = {}) {
-    const response = await fetch(`${API_BASE_URL}/api/v1/my-record?user_id=${MY_RECORD_USER_ID}`, {
+  async getMyRecord({ userId, signal } = {}) {
+    const searchParams = new URLSearchParams({
+      user_id: String(userId ?? 3),
+    });
+
+    const response = await fetch(`${API_BASE_URL}/api/v1/my-record?${searchParams.toString()}`, {
       method: "GET",
       headers: {
         Accept: "application/json",
@@ -56,15 +71,24 @@ export const myRecordService = {
     }
 
     const payload = await response.json();
+    return normalizeMyRecordPage(payload);
+  },
 
-    return {
-      highlights: normalizeHighlights(payload.highlights),
-      chartDate: payload.chartDate ?? "",
-      chartFilters: normalizeChartFilters(payload.chartFilters),
-      chartData: normalizeChartData(payload.chartData),
-      exerciseDate: payload.exerciseDate ?? "",
-      exerciseItems: normalizeExerciseItems(payload.exerciseItems),
-      diaryEntries: normalizeDiaryEntries(payload.diaryEntries),
-    };
+  async createMyRecord(request) {
+    const response = await fetch(`${API_BASE_URL}/api/v1/my-record`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(request),
+    });
+
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null);
+      throw new Error(payload?.message ?? `Failed to create my record: ${response.status}`);
+    }
+
+    return response.json();
   },
 };
